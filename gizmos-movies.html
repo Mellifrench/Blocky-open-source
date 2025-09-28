@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocky Movies</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #blocklyDiv {
+      flex-grow: 1;
+      height: 80vh;
+    }
+    #output {
+      height: 20vh;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+    /* Customize toolbox category buttons to be round */
+    .blocklyTreeRow {
+      border-radius: 20px !important;
+      padding: 5px 10px;
+      margin: 5px;
+    }
+    .blocklyTreeRow[data-category="Actors"] {
+      background-color: #6200ea;
+      color: white;
+    }
+    .blocklyTreeRow[data-category="Props"] {
+      background-color: #d81b60;
+      color: white;
+    }
+    .blocklyTreeRow[data-category="Actors"]:hover {
+      background-color: #7c4dff;
+    }
+    .blocklyTreeRow[data-category="Props"]:hover {
+      background-color: #f06292;
+    }
+    /* Block background colors to match categories */
+    .blocklyBlockCanvas .blocklyBlock[type="scene"],
+    .blocklyBlockCanvas .blocklyBlock[type="create_actor"],
+    .blocklyBlockCanvas .blocklyBlock[type="move_actor"],
+    .blocklyBlockCanvas .blocklyBlock[type="actor_say"] {
+      fill: #6200ea !important;
+      stroke: #4a00b8 !important;
+    }
+    .blocklyBlockCanvas .blocklyBlock[type="create_prop"],
+    .blocklyBlockCanvas .blocklyBlock[type="move_prop"] {
+      fill: #d81b60 !important;
+      stroke: #b0004e !important;
+    }
+    /* Style for disabled blocks */
+    .blocklyBlockCanvas .blocklyBlock.blocklyDisabled {
+      opacity: 0.5 !important;
+    }
+    #error {
+      color: red;
+      padding: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="error">Failed to load Blockly. Please check your internet connection.</div>
+  <div id="blocklyDiv"></div>
+  <div id="output">Output will appear here...</div>
+
+  <script src="https://unpkg.com/blockly@10.4.3/blockly.min.js"></script>
+  <script>
+    // Wait for Blockly to load
+    window.addEventListener('load', function() {
+      if (typeof Blockly === 'undefined') {
+        document.getElementById('error').style.display = 'block';
+        throw new Error('Blockly library not loaded');
+      }
+
+      // Define custom blocks with category colors
+      Blockly.Blocks['scene'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField('Scene');
+          this.appendStatementInput('SCENE_CONTENT')
+              .setCheck(null);
+          this.setColour('#6200ea');
+          this.setTooltip('Defines the start of a movie scene.');
+          this.setDeletable(false);
+          this.setMovable(false);
+          this.setPreviousStatement(false);
+          this.setNextStatement(false);
+          // Attempt to use @blockly/disable-top-blocks
+          this.jsonInit({ '@blockly/disable-top-blocks': true });
+        }
+      };
+
+      Blockly.Blocks['create_actor'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField('Make an actor named')
+              .appendField(new Blockly.FieldTextInput('Actor1'), 'ACTOR_NAME');
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour('#6200ea');
+          this.setTooltip('Create a new actor with the given name.');
+        }
+      };
+
+      Blockly.Blocks['move_actor'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField('Move actor')
+              .appendField(new Blockly.FieldTextInput('Actor1'), 'ACTOR_NAME')
+              .appendField('to x:')
+              .appendField(new Blockly.FieldNumber(0), 'X')
+              .appendField('y:')
+              .appendField(new Blockly.FieldNumber(0), 'Y');
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour('#6200ea');
+          this.setTooltip('Move the actor to the specified x, y coordinates.');
+        }
+      };
+
+      Blockly.Blocks['actor_say'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField(new Blockly.FieldTextInput('Actor1'), 'ACTOR_NAME')
+              .appendField('says')
+              .appendField(new Blockly.FieldTextInput('Hello!'), 'DIALOGUE');
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour('#6200ea');
+          this.setTooltip('Make the actor say something.');
+        }
+      };
+
+      Blockly.Blocks['create_prop'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField('Make a prop named')
+              .appendField(new Blockly.FieldTextInput('Prop1'), 'PROP_NAME');
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour('#d81b60');
+          this.setTooltip('Create a new prop with the given name.');
+        }
+      };
+
+      Blockly.Blocks['move_prop'] = {
+        init: function() {
+          this.appendDummyInput()
+              .appendField('Move prop')
+              .appendField(new Blockly.FieldTextInput('Prop1'), 'PROP_NAME')
+              .appendField('to x:')
+              .appendField(new Blockly.FieldNumber(0), 'X')
+              .appendField('y:')
+              .appendField(new Blockly.FieldNumber(0), 'Y');
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour('#d81b60');
+          this.setTooltip('Move the prop to the specified x, y coordinates.');
+        }
+      };
+
+      // JavaScript code generators
+      Blockly.JavaScript['scene'] = function(block) {
+        var statements = Blockly.JavaScript.statementToCode(block, 'SCENE_CONTENT');
+        return `Scene:\n${statements}`;
+      };
+
+      Blockly.JavaScript['create_actor'] = function(block) {
+        var actorName = block.getFieldValue('ACTOR_NAME');
+        return `  Create actor: ${actorName}\n`;
+      };
+
+      Blockly.JavaScript['move_actor'] = function(block) {
+        var actorName = block.getFieldValue('ACTOR_NAME');
+        var x = block.getFieldValue('X');
+        var y = block.getFieldValue('Y');
+        return `  Move actor ${actorName} to x: ${x}, y: ${y}\n`;
+      };
+
+      Blockly.JavaScript['actor_say'] = function(block) {
+        var actorName = block.getFieldValue('ACTOR_NAME');
+        var dialogue = block.getFieldValue('DIALOGUE');
+        return `  ${actorName} says: "${dialogue}"\n`;
+      };
+
+      Blockly.JavaScript['create_prop'] = function(block) {
+        var propName = block.getFieldValue('PROP_NAME');
+        return `  Create prop: ${propName}\n`;
+      };
+
+      Blockly.JavaScript['move_prop'] = function(block) {
+        var propName = block.getFieldValue('PROP_NAME');
+        var x = block.getFieldValue('X');
+        var y = block.getFieldValue('Y');
+        return `  Move prop ${propName} to x: ${x}, y: ${y}\n`;
+      };
+
+      // Initialize Blockly workspace with Zelos renderer
+      try {
+        var workspace = Blockly.inject('blocklyDiv', {
+          toolbox: `
+            <xml id="toolbox" style="display: none">
+              <category name="Actors" colour="#6200ea" data-category="Actors">
+                <block type="create_actor"></block>
+                <block type="move_actor"></block>
+                <block type="actor_say"></block>
+              </category>
+              <category name="Props" colour="#d81b60" data-category="Props">
+                <block type="create_prop"></block>
+                <block type="move_prop"></block>
+              </category>
+            </xml>
+          `,
+          renderer: 'zelos',
+          grid: {
+            spacing: 20,
+            length: 3,
+            colour: '#ccc',
+            snap: true
+          },
+          zoom: {
+            controls: true,
+            wheel: true,
+            startScale: 1.0,
+            maxScale: 3,
+            minScale: 0.3,
+            scaleSpeed: 1.2
+          }
+        });
+
+        // Add Scene block to workspace on initialization
+        var sceneBlock = workspace.newBlock('scene');
+        sceneBlock.initSvg();
+        sceneBlock.render();
+        sceneBlock.setMovable(false);
+        sceneBlock.setDeletable(false);
+        sceneBlock.moveBy(50, 50); // Position in workspace
+
+        // Enforce no orphaned blocks
+        function enforceNoOrphanedBlocks() {
+          var topBlocks = workspace.getTopBlocks();
+          topBlocks.forEach(function(block) {
+            if (block.type !== 'scene') {
+              block.setEnabled(false);
+              block.setWarningText('Blocks must be connected to the Scene block.');
+            } else {
+              block.setEnabled(true);
+              block.setWarningText(null);
+            }
+          });
+          // Re-enable blocks connected to Scene
+          var sceneBlocks = sceneBlock.getDescendants();
+          sceneBlocks.forEach(function(block) {
+            block.setEnabled(true);
+            block.setWarningText(null);
+          });
+        }
+
+        // Update output and enforce no orphaned blocks when workspace changes
+        workspace.addChangeListener(function(event) {
+          try {
+            enforceNoOrphanedBlocks();
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            document.getElementById('output').textContent = code || 'Output will appear here...';
+          } catch (e) {
+            document.getElementById('output').textContent = 'Error generating code: ' + e.message;
+          }
+        });
+
+        // Initial enforcement
+        enforceNoOrphanedBlocks();
+      } catch (e) {
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = 'Error initializing Blockly: ' + e.message;
+      }
+    });
+  </script>
+</body>
+</html>
