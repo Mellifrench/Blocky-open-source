@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocky Memes</title>
+  <script src="https://unpkg.com/blockly@10.4.3/blockly.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+    #blocklyDiv {
+      width: 60%;
+      height: 100vh;
+      float: left;
+    }
+    #memeCanvas {
+      width: 40%;
+      height: 100vh;
+      float: right;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .blocklyToolboxCategory {
+      padding: 1px;
+      border-radius: 6px;
+      color: black;
+    }
+    .blocklyToolboxCategory:hover {
+      padding: 8px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div id="blocklyDiv"></div>
+  <div id="memeCanvas">
+    <svg id="memeSvg" width="400" height="400"></svg>
+  </div>
+
+  <script>
+    // Set Blockly HSV for vibrant "Blocky" style
+    try {
+      Blockly.utils.colour.setHsvSaturation(1);
+      Blockly.utils.colour.setHsvValue(1);
+    } catch (e) {
+      console.error("Error setting Blockly color properties:", e);
+    }
+
+    // Define custom blocks
+    Blockly.Blocks['create_meme'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Create a meme with image URL")
+            .appendField(new Blockly.FieldTextInput("https://via.placeholder.com/150"), "IMAGE");
+        this.setNextStatement(true, null);
+        this.setPreviousStatement(false, null); // Disable previous connection to make it a hat block
+        this.setColour(160);
+        this.setTooltip("Start creating a meme with an image URL.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['add_text'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Add")
+            .appendField(new Blockly.FieldDropdown([["top", "TOP"], ["middle", "MIDDLE"], ["bottom", "BOTTOM"]]), "POSITION")
+            .appendField("text")
+            .appendField(new Blockly.FieldTextInput("Enter text"), "TEXT");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Add text to the meme at the specified position.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['make_demotivational'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Make a Demotivational Poster");
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("Create a demotivational poster with a black border and text.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['set_demotivational_title'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Set Demotivational Poster title to")
+            .appendField(new Blockly.FieldTextInput("Title"), "TITLE");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("Set the title for the demotivational poster.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['set_demotivational_subtitle'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Set Demotivational Poster subtitle to")
+            .appendField(new Blockly.FieldTextInput("Subtitle"), "SUBTITLE");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(300);
+        this.setTooltip("Set the subtitle for the demotivational poster.");
+        this.setHelpUrl("");
+      }
+    };
+
+    // JavaScript generators for blocks
+    Blockly.JavaScript['create_meme'] = function(block) {
+      var image = block.getFieldValue('IMAGE');
+      return `createMeme("${image}");\n`;
+    };
+
+    Blockly.JavaScript['add_text'] = function(block) {
+      var position = block.getFieldValue('POSITION');
+      var text = block.getFieldValue('TEXT');
+      return `addText("${position}", "${text}");\n`;
+    };
+
+    Blockly.JavaScript['make_demotivational'] = function(block) {
+      return 'makeDemotivational();\n';
+    };
+
+    Blockly.JavaScript['set_demotivational_title'] = function(block) {
+      var title = block.getFieldValue('TITLE');
+      return `setDemotivationalTitle("${title}");\n`;
+    };
+
+    Blockly.JavaScript['set_demotivational_subtitle'] = function(block) {
+      var subtitle = block.getFieldValue('SUBTITLE');
+      return `setDemotivationalSubtitle("${subtitle}");\n`;
+    };
+
+    // Initialize Blockly workspace with Zelos renderer
+    let workspace;
+    try {
+      workspace = Blockly.inject('blocklyDiv', {
+        toolbox: `
+          <xml>
+            <category name="Meme Blocks" colour="160">
+              <block type="create_meme"></block>
+              <block type="add_text"></block>
+              <block type="make_demotivational"></block>
+              <block type="set_demotivational_title"></block>
+              <block type="set_demotivational_subtitle"></block>
+            </category>
+          </xml>
+        `,
+        renderer: 'zelos',
+        theme: Blockly.Themes.Zelos
+      });
+    } catch (e) {
+      console.error("Error initializing Blockly workspace:", e);
+    }
+
+    // SVG rendering functions
+    let memeSvg = document.getElementById('memeSvg');
+    let memeState = {
+      image: 'https://via.placeholder.com/150',
+      texts: [],
+      isDemotivational: false,
+      demotivationalTitle: '',
+      demotivationalSubtitle: ''
+    };
+
+    function createMeme(image) {
+      // Basic URL validation
+      const validUrl = image && (image.startsWith('http://') || image.startsWith('https://')) ? image : 'https://via.placeholder.com/150';
+      console.log("Creating meme with image URL:", validUrl);
+      memeState = {
+        image: validUrl,
+        texts: [],
+        isDemotivational: false,
+        demotivationalTitle: '',
+        demotivationalSubtitle: ''
+      };
+      renderMeme();
+    }
+
+    function addText(position, text) {
+      memeState.texts.push({ position, text });
+      renderMeme();
+    }
+
+    function makeDemotivational() {
+      memeState.isDemotivational = true;
+      renderMeme();
+    }
+
+    function setDemotivationalTitle(title) {
+      memeState.demotivationalTitle = title;
+      renderMeme();
+    }
+
+    function setDemotivationalSubtitle(subtitle) {
+      memeState.demotivationalSubtitle = subtitle;
+      renderMeme();
+    }
+
+    function renderMeme() {
+      try {
+        memeSvg.innerHTML = '';
+        let svgContent = `
+          <rect x="0" y="0" width="400" height="400" fill="white"/>
+          <image href="${memeState.image}" x="100" y="${memeState.isDemotivational ? 50 : 100}" width="200" height="200"/>
+        `;
+        if (memeState.isDemotivational) {
+          svgContent += `
+            <rect x="80" y="30" width="240" height="240" fill="none" stroke="black" stroke-width="10"/>
+            <text x="200" y="320" font-family="Arial" font-size="20" font-weight="bold" fill="black" text-anchor="middle">${memeState.demotivationalTitle}</text>
+            <text x="200" y="350" font-family="Arial" font-size="14" fill="black" text-anchor="middle">${memeState.demotivationalSubtitle}</text>
+          `;
+        } else {
+          memeState.texts.forEach(textObj => {
+            let yPos = textObj.position === 'TOP' ? 50 : textObj.position === 'MIDDLE' ? 200 : 350;
+            svgContent += `
+              <text x="200" y="${yPos}" font-family="Arial" font-size="20" fill="black" text-anchor="middle">${textObj.text}</text>
+            `;
+          });
+        }
+        memeSvg.innerHTML = svgContent;
+      } catch (e) {
+        console.error("Error rendering meme:", e);
+      }
+    }
+
+    // Function to safely execute generated code
+    function executeCode(code) {
+      try {
+        const func = new Function(code);
+        func();
+      } catch (e) {
+        console.error("Error executing generated code:", e);
+      }
+    }
+
+    // Run code on workspace change
+    if (workspace) {
+      workspace.addChangeListener(function() {
+        try {
+          var code = Blockly.JavaScript.workspaceToCode(workspace);
+          executeCode(code);
+        } catch (e) {
+          console.error("Error generating code:", e);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
