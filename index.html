@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocky Open Source</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Clean sans-serif font */
+            background-color: #f8f9fa; /* Light neutral background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            text-align: center;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            max-width: 600px;
+        }
+        h1 {
+            color: #007bff; /* Modern blue accent */
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background-color: #007bff; /* Flat blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s; /* Subtle micro-animation */
+        }
+        .button:hover {
+            background-color: #0056b3; /* Darker on hover */
+            transform: translateY(-2px); /* Lift effect */
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            min-width: 160px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 5px;
+        }
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Blocky Open Source</h1>
+        <p>A modern take on visual programming, inspired by tools like Blockly, with customizable editors and utilities.</p>
+        <a href="normal-editor.html" class="button">Normal Editor</a>
+        <div class="dropdown">
+            <a href="#" class="button">Gizmos</a>
+            <div class="dropdown-content">
+                <a href="gizmos-music.html">Music</a>
+                <a href="gizmos-chatting.html">Chatting</a>
+                <a href="gizmos-junior.html">Junior</a>
+                <a href="gizmos-drawing.html">Drawing</a>
+                <a href="gizmos-memes.html">Memes</a>
+                <a href="gizmos-movies.html">Movies</a>
+            </div>
+        </div>
+        <a href="frutiger-aero.html" class="button">Frutiger Aero</a>
+    </div>
+</body>
+</html>
