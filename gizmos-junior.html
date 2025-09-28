@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocky JR</title>
+    <script src="https://unpkg.com/blockly@10.4.3/blockly.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #blocklyDiv {
+            width: 100%;
+            height: 100%;
+        }
+        .blocklyToolboxCategory {
+            padding: 1px;
+            border-radius: 6px;
+            color: black;
+        }
+        .blocklyToolboxCategory:hover {
+            padding: 8px;
+            color: white;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="blocklyDiv"></div>
+    <xml id="toolbox" style="display: none">
+        <category name="Events" colour="210">
+            <block type="on_start"></block>
+            <block type="when_key_pressed">
+                <field name="KEY">space</field>
+            </block>
+        </category>
+        <category name="Middle" colour="270">
+            <block type="print_text">
+                <value name="TEXT">
+                    <shadow type="text">
+                        <field name="TEXT">Hello, World!</field>
+                    </shadow>
+                </value>
+            </block>
+            <block type="repeat_loop">
+                <field name="TIMES">10</field>
+                <statement name="DO"></statement>
+            </block>
+            <block type="wait_ms">
+                <value name="TIME">
+                    <shadow type="math_number">
+                        <field name="NUM">1000</field>
+                    </shadow>
+                </value>
+            </block>
+        </category>
+        <category name="End" colour="330">
+            <block type="stop_code"></block>
+        </category>
+    </xml>
+
+    <script>
+        // Set HSV saturation and value for vibrant colors
+        Blockly.utils.colour.setHsvSaturation(1);
+        Blockly.utils.colour.setHsvValue(1);
+
+        // Define custom blocks
+        Blockly.Blocks['on_start'] = {
+            init: function() {
+                this.appendStatementInput("DO")
+                    .setCheck(null)
+                    .appendField("On start");
+                this.setColour(210);
+                this.setTooltip("Runs when the program starts");
+            }
+        };
+
+        Blockly.Blocks['when_key_pressed'] = {
+            init: function() {
+                this.appendStatementInput("DO")
+                    .setCheck(null)
+                    .appendField("When")
+                    .appendField(new Blockly.FieldDropdown([
+                        ["space", "space"],
+                        ["left", "left"],
+                        ["right", "right"],
+                        ["up", "up"],
+                        ["down", "down"]
+                    ]), "KEY")
+                    .appendField("is pressed");
+                this.setColour(210);
+                this.setTooltip("Runs when the specified key is pressed");
+            }
+        };
+
+        Blockly.Blocks['print_text'] = {
+            init: function() {
+                this.appendValueInput("TEXT")
+                    .setCheck("String")
+                    .appendField("print");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour(270);
+                this.setTooltip("Prints text to the console");
+            }
+        };
+
+        Blockly.Blocks['repeat_loop'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("repeat")
+                    .appendField(new Blockly.FieldNumber(10, 0), "TIMES")
+                    .appendField("times");
+                this.appendStatementInput("DO")
+                    .setCheck(null);
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour(270);
+                this.setTooltip("Repeats the blocks inside a specified number of times");
+            }
+        };
+
+        Blockly.Blocks['wait_ms'] = {
+            init: function() {
+                this.appendValueInput("TIME")
+                    .setCheck("Number")
+                    .appendField("wait for");
+                this.appendDummyInput()
+                    .appendField("ms");
+                this.setPreviousStatement(true);
+                this.setNextStatement(true);
+                this.setColour(270);
+                this.setTooltip("Pauses execution for specified milliseconds");
+            }
+        };
+
+        Blockly.Blocks['stop_code'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField("Stop code");
+                this.setPreviousStatement(true);
+                this.setColour(330);
+                this.setTooltip("Stops the program execution");
+            }
+        };
+
+        // JavaScript code generators
+        Blockly.JavaScript['on_start'] = function(block) {
+            var statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            var code = 'window.addEventListener("load", async function() {\n' + statements + '});\n';
+            return code;
+        };
+
+        Blockly.JavaScript['when_key_pressed'] = function(block) {
+            var key = block.getFieldValue('KEY');
+            var statements = Blockly.JavaScript.statementToCode(block, 'DO');
+            var code = 'document.addEventListener("keydown", async function(event) { if (event.key === "' + key + '") {\n' + statements + '}});\n';
+            return code;
+        };
+
+        Blockly.JavaScript['print_text'] = function(block) {
+            var text = Blockly.JavaScript.valueToCode(block, 'TEXT', Blockly.JavaScript.ORDER_ATOMIC) || '""';
+            return 'console.log(' + text + ');\n';
+        };
+
+        Blockly.JavaScript['repeat_loop'] = function(block) {
+            var times = block.getFieldValue('TIMES');
+            var branch = Blockly.JavaScript.statementToCode(block, 'DO');
+            return 'for (let i = 0; i < ' + times + '; i++) {\n' + branch + '}\n';
+        };
+
+        Blockly.JavaScript['wait_ms'] = function(block) {
+            var time = Blockly.JavaScript.valueToCode(block, 'TIME', Blockly.JavaScript.ORDER_ATOMIC) || '1000';
+            return 'await new Promise(resolve => setTimeout(resolve, ' + time + '));\n';
+        };
+
+        Blockly.JavaScript['stop_code'] = function(block) {
+            return 'return;\n';
+        };
+
+        // Initialize Blockly
+        var workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            renderer: 'thrasos',
+            toolboxPosition: 'end'
+        });
+
+        // Function to run the generated code
+        async function runCode() {
+            Blockly.JavaScript.addReservedWords('code');
+            var code = Blockly.JavaScript.workspaceToCode(workspace);
+            try {
+                await eval('(async () => {' + code + '})()');
+            } catch (e) {
+                console.error('Error running code:', e);
+            }
+        }
+
+        // Add run button
+        const runButton = document.createElement('button');
+        runButton.textContent = 'Run Code';
+        runButton.style.position = 'absolute';
+        runButton.style.top = '10px';
+        runButton.style.right = '10px';
+        runButton.onclick = runCode;
+        document.body.appendChild(runButton);
+    </script>
+</body>
+</html>
