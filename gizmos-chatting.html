@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocky Chating</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    #blocklyDiv {
+      height: 100vh;
+      width: 100%;
+    }
+    .blocklyToolboxCategory {
+      padding: 1px;
+      border-radius: 6px;
+      color: black;
+    }
+    .blocklyToolboxCategory[aria-label="Simple"] {
+      background-color: hsl(160, 100%, 50%);
+    }
+    .blocklyToolboxCategory[aria-label="Answers"] {
+      background-color: hsl(210, 100%, 50%);
+    }
+    .blocklyToolboxCategory[aria-label="Inputs"] {
+      background-color: hsl(260, 100%, 50%);
+    }
+    .blocklyToolboxCategory[aria-label="Variables"] {
+      background-color: hsl(260, 100%, 50%);
+    }
+    .blocklyToolboxCategory[aria-label="More"] {
+      background-color: hsl(260, 100%, 50%);
+    }
+    .blocklyToolboxCategory:hover {
+      padding: 8px;
+      color: white;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="blocklyDiv"></div>
+
+  <script>
+    // Configure Blockly colors
+    Blockly.utils.colour.setHsvSaturation(1);
+    Blockly.utils.colour.setHsvValue(1);
+
+    // Define custom blocks
+    Blockly.Blocks['greet_user'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('Greet to user')
+            .appendField(new Blockly.FieldTextInput('Hello!'), 'GREETING');
+        this.setNextStatement(true);
+        this.setColour(160);
+        this.setTooltip('Greet the user with a message');
+        this.setHelpUrl('');
+        this.hat = 'cap';
+      }
+    };
+
+    Blockly.Blocks['message'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('Message')
+            .appendField(new Blockly.FieldTextInput(''), 'MESSAGE_TEXT');
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour(160);
+        this.setTooltip('Display a message');
+        this.setHelpUrl('');
+      }
+    };
+
+    Blockly.Blocks['message_answer'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('Message an Answer')
+            .appendField(new Blockly.FieldTextInput(''), 'ANSWER_TEXT');
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour(160);
+        this.setTooltip('Display an answer message');
+        this.setHelpUrl('');
+      }
+    };
+
+    Blockly.Blocks['if_user_answered'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('if user Answered')
+            .appendField(new Blockly.FieldTextInput(''), 'CONDITION');
+        this.appendStatementInput('THEN')
+            .setCheck(null)
+            .appendField('then');
+        this.appendStatementInput('ELSE')
+            .setCheck(null)
+            .appendField('else')
+            .appendField(new Blockly.FieldDropdown([['yes', 'YES'], ['no', 'NO']]), 'ELSE_OPTION');
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour(210);
+        this.setTooltip('Check if user provided an answer');
+        this.setHelpUrl('');
+      }
+    };
+
+    Blockly.Blocks['set_text_input'] = {
+      init: function() {
+        this.appendValueInput('VALUE')
+            .setCheck(null)
+            .appendField('set')
+            .appendField(new Blockly.FieldTextInput('Text input'), 'VAR_NAME')
+            .appendField('to');
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour(260);
+        this.setTooltip('Set a text input variable');
+        this.setHelpUrl('');
+      }
+    };
+
+    Blockly.Blocks['get_text_input'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('get')
+            .appendField(new Blockly.FieldTextInput('Text input'), 'VAR_NAME');
+        this.setOutput(true, null);
+        this.setColour(260);
+        this.setTooltip('Get a text input variable');
+        this.setHelpUrl('');
+      }
+    };
+
+    Blockly.Blocks['username'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('Username');
+        this.setOutput(true, null);
+        this.setColour(260);
+        this.setTooltip('Get the username');
+        this.setHelpUrl('');
+      }
+    };
+
+    // Initialize Blockly workspace
+    const workspace = Blockly.inject('blocklyDiv', {
+      renderer: 'zelos',
+      toolbox: {
+        kind: 'categoryToolbox',
+        contents: [
+          {
+            kind: 'category',
+            name: 'Simple',
+            colour: '160',
+            contents: [
+              { kind: 'block', type: 'greet_user' },
+              { kind: 'block', type: 'message' },
+              { kind: 'block', type: 'message_answer' }
+            ]
+          },
+          {
+            kind: 'category',
+            name: 'Answers',
+            colour: '210',
+            contents: [
+              { kind: 'block', type: 'if_user_answered' }
+            ]
+          },
+          {
+            kind: 'category',
+            name: 'Inputs',
+            colour: '260',
+            contents: [
+              {
+                kind: 'category',
+                name: 'Variables',
+                colour: '260',
+                contents: [
+                  { kind: 'block', type: 'set_text_input' },
+                  { kind: 'block', type: 'get_text_input' }
+                ]
+              },
+              {
+                kind: 'category',
+                name: 'More',
+                colour: '260',
+                contents: [
+                  { kind: 'block', type: 'username' }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    });
+  </script>
+</body>
+</html>
