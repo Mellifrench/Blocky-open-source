@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocky</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+  <script src="https://unpkg.com/blockly/msg/js/en.js"></script>
+  <script src="path/to/testhats.js"></script>
+  <script src="path/to/blockly_to_testhats.js"></script>
+
+  <style>
+    body {
+      background-color: #0077ff;
+      color: white;
+    }
+    /* Customize Blockly appearance */
+    /* Modify Blockly's appearance to resemble Scratch 3.0 (Zelos) */
+    .render {
+      background-color: #f2f2f2;
+      fill: #fff;
+      stroke: #fff;
+      font-family: Arial, serif;
+    }
+
+    /* Modify block colors to resemble Scratch 3.0 */
+    /* Yellow category */
+    .blocklyTreeRow.blocklyCategoryBegin {
+      background-color: lightyellow !important;
+    }
+    /* Green category */
+    .blocklyTreeRow.blocklyCategoryMiddle {
+      background-color: lime !important;
+    }
+    /* Blue category */
+    .blocklyTreeRow.blocklyCategoryLogic {
+      background-color: cyan !important;
+    }
+    /* Red category */
+    .blocklyTreeRow.blocklyCategoryEnd {
+      background-color: pink !important;
+    }
+        /* Purple category */
+    .blocklyTreeRow.blocklyCategoryVariables {
+      background-color: plum !important;
+    }
+    /* Teal category */
+    .blocklyTreeRow.blocklyCategoryFunctions {
+      background-color: teal !important;
+    }
+.blocklyToolboxCategory {
+  padding: 1px;
+  border-radius: 6px;
+  color: black;
+}
+.blocklyToolboxCategory:hover {
+  padding: 8px;
+  color: gray;
+}
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Blocky Editor</h1>
+  <div id="blocklyDiv" style="height: 87%; width: 90%; box-shadow: 0px 0px 44px 22px rgba(255,255,255,1); margin: auto; "></div>
+  <xml id="toolbox" style="display: none;">
+    <!-- Yellow category: Begin -->
+    <category name="Begin" colour="45">
+      <block type="begin_block"></block>
+      <block type="open_block"></block>
+    </category>
+    <!-- Green category: Middle -->
+    <category name="Middle" colour="120">
+      <block type="text_print"></block>
+      <block type="custom_reporter"></block>
+      <block type="ask"></block>
+      <block type="answer_block"></block>
+      <block type="text_join"></block>
+      <block type="controls_repeat_times"></block>
+      <block type="wait_seconds"></block>
+    </category>
+    <!-- orange category: Number -->
+    <category name="Number" colour="24">
+      <label text="Numeral"></label>
+      <block type="number"></block>
+      <block type="math_arithmetic"></block>
+      <block type="random_integer"></block>
+      <label text="Text-like"></label>
+      <block type="username_block"></block>
+    </category>
+    <!-- Red category: End -->
+    <category name="End" colour="0">
+      <block type="end_block"></block>
+    </category>
+    <!-- Blue category: Logics -->
+    <category name="Logics" colour="210">
+     <category name="Controls" colour="210">
+      <block type="controls_if"></block>
+      <block type="controls_ifelse"></block>
+     </category>
+     <category name="Logic" colour="210">
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_boolean"></block>
+      <block type="logic_negate"></block>
+      <block type="logic_null"></block>
+      <block type="logic_ternary"></block>
+      <block type="logic_error"></block>
+     </category>
+    </category>
+  <category name="Defining/Customizing" colour="290">
+    <!-- Purple category: Variables -->
+     <category name="Variables" colour="290" custom="VARIABLE">
+     </category>
+    <!-- Teal category: Functions -->
+    <category name="Functions" colour="290" custom="PROCEDURE">
+    </category>
+  </category>
+
+  </xml>
+
+
+  <script>
+    // Initialize Blockly
+    var workspace = Blockly.inject('blocklyDiv', {
+      toolbox: document.getElementById('toolbox'),
+      renderer: 'zelos', // Use Zelos renderer
+      trashcan: true, // Enable the trashcan
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1.0,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2
+      }
+    });
+
+    // Define custom blocks
+    Blockly.Blocks['begin_block'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("when code starts");
+        this.setNextStatement(true, null);
+        this.setColour(45);
+        this.setTooltip("This block starts the code execution.");
+        this.setHelpUrl("");
+        this.hat = "cap"
+      }
+    };
+
+    Blockly.Blocks['open_block'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("return code");
+        this.setNextStatement(true, null);
+        this.setOutput(true, null);
+        this.setColour(45);
+        this.setTooltip("Returns the code");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['custom_reporter'] = {
+      init: function () {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldTextInput("hello worlds"), "TEXT");
+        this.setOutput(true, null);
+        this.setColour(120);
+        this.setTooltip("Reports the text entered.");
+        this.setHelpUrl("");
+      }
+    };
+
+   Blockly.Blocks['answer_block'] = {
+      init: function () {
+        this.appendDummyInput()
+              .appendField('answer');
+        this.setOutput(true, null);
+        this.setColour(120);
+        this.setTooltip("Reports the user's answer to the 'ask' block.");
+        this.setHelpUrl("");
+      }
+    };
+
+   Blockly.Blocks['number'] = {
+      init: function () {
+        this.appendDummyInput()
+              .appendField(new Blockly.FieldNumber(123), 'NUM');
+        this.setOutput(true, null);
+        this.setColour(24);
+        this.setTooltip("Reports the number entered.");
+        this.setHelpUrl("");
+      }
+    };
+
+   Blockly.Blocks['username_block'] = {
+      init: function () {
+        this.appendDummyInput()
+              .appendField('username');
+        this.setOutput(true, null);
+        this.setColour(24);
+        this.setTooltip("Reports the current user's username.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['end_block'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("stop this script");
+        this.setPreviousStatement(true, null);
+        this.setColour(0);
+        this.setTooltip("Stops the currently running script.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['ask'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("ask your name");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120);
+        this.setTooltip("Asks the user a question and stores the answer.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['logic_error'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("error");
+        this.setOutput(true, null);
+        this.setColour(210);
+        this.setTooltip("Reports an error value.");
+        this.setHelpUrl("");
+      }
+    };
+
+     Blockly.Blocks['math_arithmetic'] = {
+      init: function() {
+        this.appendValueInput("A")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown([["+","ADD"], ["-","MINUS"], ["*","MULTIPLY"], ["/","DIVIDE"], ["^","POWER"]]), "OP");
+        this.appendValueInput("B")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(24);
+        this.setTooltip("Do basic arithmetic operations.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['controls_repeat_times'] = {
+      init: function() {
+        this.appendValueInput("TIMES")
+            .setCheck("Number")
+            .appendField("repeat");
+        this.appendDummyInput()
+            .appendField("times");
+        this.appendStatementInput("DO")
+            .appendField("do");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120); // Green, for Middle category
+        this.setTooltip("Repeats the contained blocks a specified number of times.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['wait_seconds'] = {
+      init: function() {
+        this.appendValueInput("SECONDS")
+            .setCheck("Number")
+            .appendField("wait");
+        this.appendDummyInput()
+            .appendField("seconds");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(120); // Green, for Middle category
+        this.setTooltip("Waits for a specified number of seconds.");
+        this.setHelpUrl("");
+      }
+    };
+
+    Blockly.Blocks['random_integer'] = {
+      init: function() {
+        this.appendValueInput("FROM")
+            .setCheck("Number")
+            .appendField("random integer from");
+        this.appendValueInput("TO")
+            .setCheck("Number")
+            .appendField("to");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setColour(24); // Orange, for Number category
+        this.setTooltip("Generates a random integer between two numbers (inclusive).");
+        this.setHelpUrl("");
+      }
+    };
+
+    // Load workspace blocks (optional)
+    Blockly.utils.colour.setHsvSaturation(1)
+    Blockly.utils.colour.setHsvValue(1)
+    Blockly.Xml.domToWorkspace(document.getElementById('toolbox'), workspace);
+  </script>
+</body>
+</html>
