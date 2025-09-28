@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocky Music</title>
+    <script src="https://unpkg.com/blockly@10.4.3/blockly.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #blocklyDiv {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="blocklyDiv"></div>
+
+    <script>
+        // Set Blockly HSV saturation and value for vibrant colors
+        Blockly.utils.colour.setHsvSaturation(1);
+        Blockly.utils.colour.setHsvValue(1);
+
+        // Define custom blocks
+        Blockly.Blocks['on_start'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('on code starts');
+                this.setNextStatement(true, null);
+                this.setColour(50); // Yellow for hat block
+                this.setTooltip('Runs when the program starts');
+                this.setHelpUrl('');
+                this.setDeletable(false);
+                this.setMovable(false);
+                this.hat = true; // Mark as hat block
+                this.hat = "cap";
+            }
+        };
+
+        Blockly.Blocks['on_start_alt'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('on other code starts');
+                this.setNextStatement(true, null);
+                this.setColour(50); // Yellow for hat block
+                this.setTooltip('Runs when the program starts');
+                this.setHelpUrl('');
+                this.hat = "cap";
+            }
+        };
+
+        Blockly.Blocks['play_note'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('play note');
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(160); // Blue-ish for music actions
+                this.setTooltip('Plays the current note');
+                this.setHelpUrl('');
+            }
+        };
+
+        Blockly.Blocks['set_note'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('set note to')
+                    .appendField(new Blockly.FieldDropdown([
+                        ['C4', 'C4'],
+                        ['D4', 'D4'],
+                        ['E4', 'E4'],
+                        ['F4', 'F4'],
+                        ['G4', 'G4'],
+                        ['A4', 'A4'],
+                        ['B4', 'B4']
+                    ]), 'NOTE');
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(200); // Cyan for note settings
+                this.setTooltip('Sets the note to play');
+                this.setHelpUrl('');
+            }
+        };
+
+        Blockly.Blocks['set_note_volume'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('set note volume to')
+                    .appendField(new Blockly.FieldNumber(50, 0, 100), 'VOLUME');
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(240); // Purple for volume settings
+                this.setTooltip('Sets the volume of the note (0-100)');
+                this.setHelpUrl('');
+            }
+        };
+
+        Blockly.Blocks['set_note_type'] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField('set note type to')
+                    .appendField(new Blockly.FieldDropdown([
+                        ['Piano', 'PIANO'],
+                        ['Guitar', 'GUITAR'],
+                        ['Violin', 'VIOLIN'],
+                        ['Synth', 'SYNTH']
+                    ]), 'TYPE');
+                this.setPreviousStatement(true, null);
+                this.setNextStatement(true, null);
+                this.setColour(280); // Magenta for note type
+                this.setTooltip('Sets the type of instrument for the note');
+                this.setHelpUrl('');
+            }
+        };
+
+        // Initialize Blockly workspace with Zelos renderer
+        const workspace = Blockly.inject('blocklyDiv', {
+            toolbox: {
+                kind: 'flyoutToolbox',
+                contents: [
+                    {
+                        kind: 'label',
+                        text: 'Events'
+                    },
+                    {
+                        kind: 'block',
+                        type: 'on_start_alt'
+                    },
+                    {
+                        kind: 'label',
+                        text: 'Notes'
+                    },
+                    {
+                        kind: 'block',
+                        type: 'play_note'
+                    },
+                    {
+                        kind: 'block',
+                        type: 'set_note'
+                    },
+                    {
+                        kind: 'block',
+                        type: 'set_note_volume'
+                    },
+                    {
+                        kind: 'block',
+                        type: 'set_note_type'
+                    }
+                ]
+            },
+            renderer: 'zelos',
+            zoom: {
+                controls: true,
+                wheel: true,
+                startScale: 1.0,
+                maxScale: 3,
+                minScale: 0.3,
+                scaleSpeed: 1.2
+            },
+            grid: {
+                spacing: 20,
+                length: 3,
+                colour: '#ccc',
+                snap: true
+            },
+            move: {
+                scrollbars: true,
+                drag: true,
+                wheel: true
+            }
+        });
+
+        // Add a default "on start" block to the workspace
+        const startBlock = workspace.newBlock('on_start');
+        startBlock.initSvg();
+        startBlock.render();
+        startBlock.moveBy(100, 50);
+    </script>
+</body>
+</html>
