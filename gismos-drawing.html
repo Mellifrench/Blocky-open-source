@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocky Drawing</title>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blockly.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #blocklyDiv {
+      width: 70%;
+      height: 100%;
+      float: left;
+    }
+    #output {
+      width: 30%;
+      height: 100%;
+      float: right;
+      background: #f0f0f0;
+      overflow: auto;
+    }
+    #svgCanvas {
+      width: 100%;
+      height: 100%;
+    }
+    .blocklyToolboxCategory {
+      padding: 1px;
+      border-radius: 6px;
+      color: black;
+    }
+    .blocklyToolboxCategory:hover {
+      padding: 8px;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div id="blocklyDiv"></div>
+  <div id="output">
+    <svg id="svgCanvas" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <script>
+    // Set Blockly HSV saturation and value
+    try {
+      Blockly.utils.colour.setHsvSaturation(1);
+      Blockly.utils.colour.setHsvValue(1);
+    } catch (e) {
+      console.error('Error setting Blockly HSV settings:', e);
+    }
+
+    // Expanded HTML5 color names for dropdown
+    const colorOptions = [
+      ['Red', 'red'],
+      ['Blue', 'blue'],
+      ['Green', 'green'],
+      ['Black', 'black'],
+      ['White', 'white'],
+      ['Yellow', 'yellow'],
+      ['Purple', 'purple'],
+      ['Orange', 'orange'],
+      ['Pink', 'pink'],
+      ['Brown', 'brown'],
+      ['Gray', 'gray'],
+      ['Cyan', 'cyan'],
+      ['Magenta', 'magenta'],
+      ['Lime', 'lime'],
+      ['Teal', 'teal'],
+      ['Indigo', 'indigo'],
+      ['Violet', 'violet'],
+      ['Gold', 'gold'],
+      ['Silver', 'silver'],
+      ['Olive', 'olive']
+    ];
+
+    // Define custom blocks
+    Blockly.Blocks['draw_circle'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw circle at x")
+            .appendField(new Blockly.FieldNumber(100), "X")
+            .appendField("y")
+            .appendField(new Blockly.FieldNumber(100), "Y")
+            .appendField("radius")
+            .appendField(new Blockly.FieldNumber(50), "RADIUS")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("red"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Draw a filled circle");
+      }
+    };
+
+    Blockly.Blocks['draw_square'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw square at x")
+            .appendField(new Blockly.FieldNumber(100), "X")
+            .appendField("y")
+            .appendField(new Blockly.FieldNumber(100), "Y")
+            .appendField("size")
+            .appendField(new Blockly.FieldNumber(100), "SIZE")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("green"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Draw a filled square");
+      }
+    };
+
+    Blockly.Blocks['draw_triangle'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw triangle at x1")
+            .appendField(new Blockly.FieldNumber(100), "X1")
+            .appendField("y1")
+            .appendField(new Blockly.FieldNumber(100), "Y1")
+            .appendField("x2")
+            .appendField(new Blockly.FieldNumber(150), "X2")
+            .appendField("y2")
+            .appendField(new Blockly.FieldNumber(150), "Y2")
+            .appendField("x3")
+            .appendField(new Blockly.FieldNumber(50), "X3")
+            .appendField("y3")
+            .appendField(new Blockly.FieldNumber(150), "Y3")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("blue"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Draw a filled triangle");
+      }
+    };
+
+    Blockly.Blocks['draw_line'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw line from x1")
+            .appendField(new Blockly.FieldNumber(50), "X1")
+            .appendField("y1")
+            .appendField(new Blockly.FieldNumber(50), "Y1")
+            .appendField("to x2")
+            .appendField(new Blockly.FieldNumber(150), "X2")
+            .appendField("y2")
+            .appendField(new Blockly.FieldNumber(150), "Y2")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("black"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Draw a line");
+      }
+    };
+
+    Blockly.Blocks['draw_curve'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw curve from x1")
+            .appendField(new Blockly.FieldNumber(50), "X1")
+            .appendField("y1")
+            .appendField(new Blockly.FieldNumber(50), "Y1")
+            .appendField("control x2")
+            .appendField(new Blockly.FieldNumber(100), "X2")
+            .appendField("y2")
+            .appendField(new Blockly.FieldNumber(150), "Y2")
+            .appendField("to x3")
+            .appendField(new Blockly.FieldNumber(150), "X3")
+            .appendField("y3")
+            .appendField(new Blockly.FieldNumber(50), "Y3")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("black"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+        this.setTooltip("Draw a quadratic Bezier curve");
+      }
+    };
+
+    Blockly.Blocks['draw_fill_less_circle'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw fill-less circle at x")
+            .appendField(new Blockly.FieldNumber(100), "X")
+            .appendField("y")
+            .appendField(new Blockly.FieldNumber(100), "Y")
+            .appendField("radius")
+            .appendField(new Blockly.FieldNumber(50), "RADIUS")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("red"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw a circle outline");
+      }
+    };
+
+    Blockly.Blocks['draw_fill_less_square'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw fill-less square at x")
+            .appendField(new Blockly.FieldNumber(100), "X")
+            .appendField("y")
+            .appendField(new Blockly.FieldNumber(100), "Y")
+            .appendField("size")
+            .appendField(new Blockly.FieldNumber(100), "SIZE")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("green"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw a square outline");
+      }
+    };
+
+    Blockly.Blocks['draw_fill_less_triangle'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw fill-less triangle at x1")
+            .appendField(new Blockly.FieldNumber(100), "X1")
+            .appendField("y1")
+            .appendField(new Blockly.FieldNumber(100), "Y1")
+            .appendField("x2")
+            .appendField(new Blockly.FieldNumber(150), "X2")
+            .appendField("y2")
+            .appendField(new Blockly.FieldNumber(150), "Y2")
+            .appendField("x3")
+            .appendField(new Blockly.FieldNumber(50), "X3")
+            .appendField("y3")
+            .appendField(new Blockly.FieldNumber(150), "Y3")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("blue"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw a triangle outline");
+      }
+    };
+
+    Blockly.Blocks['draw_text'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw text")
+            .appendField(new Blockly.FieldTextInput("Hello"), "TEXT")
+            .appendField("at x")
+            .appendField(new Blockly.FieldNumber(100), "X")
+            .appendField("y")
+            .appendField(new Blockly.FieldNumber(100), "Y")
+            .appendField("color")
+            .appendField(new Blockly.FieldDropdown(colorOptions), "COLOR")
+            .appendField("selected:")
+            .appendField(new Blockly.FieldTextInput("black"), "COLOR_NAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw text on the canvas");
+      }
+    };
+
+    Blockly.Blocks['draw_image'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("draw image at x")
+            .appendField(new Blockly.FieldNumber(100), "X")
+            .appendField("y")
+            .appendField(new Blockly.FieldNumber(100), "Y")
+            .appendField("url")
+            .appendField(new Blockly.FieldTextInput("image.png"), "URL");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(230);
+        this.setTooltip("Draw an image (URL must be valid)");
+      }
+    };
+
+    // JavaScript code generators
+    Blockly.JavaScript['draw_circle'] = function(block) {
+      const x = block.getFieldValue('X');
+      const y = block.getFieldValue('Y');
+      const radius = block.getFieldValue('RADIUS');
+      const color = block.getFieldValue('COLOR');
+      return `drawCircle(${x}, ${y}, ${radius}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_square'] = function(block) {
+      const x = block.getFieldValue('X');
+      const y = block.getFieldValue('Y');
+      const size = block.getFieldValue('SIZE');
+      const color = block.getFieldValue('COLOR');
+      return `drawSquare(${x}, ${y}, ${size}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_triangle'] = function(block) {
+      const x1 = block.getFieldValue('X1');
+      const y1 = block.getFieldValue('Y1');
+      const x2 = block.getFieldValue('X2');
+      const y2 = block.getFieldValue('Y2');
+      const x3 = block.getFieldValue('X3');
+      const y3 = block.getFieldValue('Y3');
+      const color = block.getFieldValue('COLOR');
+      return `drawTriangle(${x1}, ${y1}, ${x2}, ${y2}, ${x3}, ${y3}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_line'] = function(block) {
+      const x1 = block.getFieldValue('X1');
+      const y1 = block.getFieldValue('Y1');
+      const x2 = block.getFieldValue('X2');
+      const y2 = block.getFieldValue('Y2');
+      const color = block.getFieldValue('COLOR');
+      return `drawLine(${x1}, ${y1}, ${x2}, ${y2}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_curve'] = function(block) {
+      const x1 = block.getFieldValue('X1');
+      const y1 = block.getFieldValue('Y1');
+      const x2 = block.getFieldValue('X2');
+      const y2 = block.getFieldValue('Y2');
+      const x3 = block.getFieldValue('X3');
+      const y3 = block.getFieldValue('Y3');
+      const color = block.getFieldValue('COLOR');
+      return `drawCurve(${x1}, ${y1}, ${x2}, ${y2}, ${x3}, ${y3}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_fill_less_circle'] = function(block) {
+      const x = block.getFieldValue('X');
+      const y = block.getFieldValue('Y');
+      const radius = block.getFieldValue('RADIUS');
+      const color = block.getFieldValue('COLOR');
+      return `drawFillLessCircle(${x}, ${y}, ${radius}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_fill_less_square'] = function(block) {
+      const x = block.getFieldValue('X');
+      const y = block.getFieldValue('Y');
+      const size = block.getFieldValue('SIZE');
+      const color = block.getFieldValue('COLOR');
+      return `drawFillLessSquare(${x}, ${y}, ${size}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_fill_less_triangle'] = function(block) {
+      const x1 = block.getFieldValue('X1');
+      const y1 = block.getFieldValue('Y1');
+      const x2 = block.getFieldValue('X2');
+      const y2 = block.getFieldValue('Y2');
+      const x3 = block.getFieldValue('X3');
+      const y3 = block.getFieldValue('Y3');
+      const color = block.getFieldValue('COLOR');
+      return `drawFillLessTriangle(${x1}, ${y1}, ${x2}, ${y2}, ${x3}, ${y3}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_text'] = function(block) {
+      const text = block.getFieldValue('TEXT');
+      const x = block.getFieldValue('X');
+      const y = block.getFieldValue('Y');
+      const color = block.getFieldValue('COLOR');
+      return `drawText('${text}', ${x}, ${y}, '${color}');\n`;
+    };
+
+    Blockly.JavaScript['draw_image'] = function(block) {
+      const x = block.getFieldValue('X');
+      const y = block.getFieldValue('Y');
+      const url = block.getFieldValue('URL');
+      return `drawImage('${url}', ${x}, ${y});\n`;
+    };
+
+    // Drawing functions
+    function drawCircle(x, y, radius, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', radius);
+        circle.setAttribute('fill', color);
+        svg.appendChild(circle);
+      } catch (e) {
+        console.error('Error in drawCircle:', e);
+      }
+    }
+
+    function drawSquare(x, y, size, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', size);
+        rect.setAttribute('height', size);
+        rect.setAttribute('fill', color);
+        svg.appendChild(rect);
+      } catch (e) {
+        console.error('Error in drawSquare:', e);
+      }
+    }
+
+    function drawTriangle(x1, y1, x2, y2, x3, y3, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', `${x1},${y1} ${x2},${y2} ${x3},${y3}`);
+        poly.setAttribute('fill', color);
+        svg.appendChild(poly);
+      } catch (e) {
+        console.error('Error in drawTriangle:', e);
+      }
+    }
+
+    function drawLine(x1, y1, x2, y2, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', 2);
+        svg.appendChild(line);
+      } catch (e) {
+        console.error('Error in drawLine:', e);
+      }
+    }
+
+    function drawCurve(x1, y1, x2, y2, x3, y3, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M${x1},${y1} Q${x2},${y2} ${x3},${y3}`);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', color);
+        path.setAttribute('stroke-width', 2);
+        svg.appendChild(path);
+      } catch (e) {
+        console.error('Error in drawCurve:', e);
+      }
+    }
+
+    function drawFillLessCircle(x, y, radius, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', radius);
+        circle.setAttribute('fill', 'none');
+        circle.setAttribute('stroke', color);
+        circle.setAttribute('stroke-width', 2);
+        svg.appendChild(circle);
+      } catch (e) {
+        console.error('Error in drawFillLessCircle:', e);
+      }
+    }
+
+    function drawFillLessSquare(x, y, size, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', size);
+        rect.setAttribute('height', size);
+        rect.setAttribute('fill', 'none');
+        rect.setAttribute('stroke', color);
+        rect.setAttribute('stroke-width', 2);
+        svg.appendChild(rect);
+      } catch (e) {
+        console.error('Error in drawFillLessSquare:', e);
+      }
+    }
+
+    function drawFillLessTriangle(x1, y1, x2, y2, x3, y3, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        poly.setAttribute('points', `${x1},${y1} ${x2},${y2} ${x3},${y3}`);
+        poly.setAttribute('fill', 'none');
+        poly.setAttribute('stroke', color);
+        poly.setAttribute('stroke-width', 2);
+        svg.appendChild(poly);
+      } catch (e) {
+        console.error('Error in drawFillLessTriangle:', e);
+      }
+    }
+
+    function drawText(text, x, y, color) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textElement.setAttribute('x', x);
+        textElement.setAttribute('y', y);
+        textElement.setAttribute('fill', color);
+        textElement.textContent = text;
+        svg.appendChild(textElement);
+      } catch (e) {
+        console.error('Error in drawText:', e);
+      }
+    }
+
+    function drawImage(url, x, y) {
+      try {
+        const svg = document.getElementById('svgCanvas');
+        const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        image.setAttribute('x', x);
+        image.setAttribute('y', y);
+        image.setAttribute('href', url);
+        svg.appendChild(image);
+      } catch (e) {
+        console.error('Error in drawImage:', e);
+      }
+    }
+
+    // Initialize Blockly
+    let workspace;
+    try {
+      const toolbox = {
+        "kind": "categoryToolbox",
+        "contents": [
+          {
+            "kind": "category",
+            "name": "Shapes",
+            "colour": "160",
+            "contents": [
+              { "kind": "block", "type": "draw_circle" },
+              { "kind": "block", "type": "draw_square" },
+              { "kind": "block", "type": "draw_triangle" },
+              { "kind": "block", "type": "draw_line" },
+              { "kind": "block", "type": "draw_curve" }
+            ]
+          },
+          {
+            "kind": "category",
+            "name": "Extra",
+            "colour": "230",
+            "contents": [
+              { "kind": "block", "type": "draw_fill_less_circle" },
+              { "kind": "block", "type": "draw_fill_less_square" },
+              { "kind": "block", "type": "draw_fill_less_triangle" },
+              { "kind": "block", "type": "draw_text" },
+              { "kind": "block", "type": "draw_image" }
+            ]
+          }
+        ]
+      };
+
+      workspace = Blockly.inject('blocklyDiv', {
+        toolbox: toolbox,
+        renderer: 'zelos',
+        theme: Blockly.Themes.Zelos
+      });
+    } catch (e) {
+      console.error('Error initializing Blockly:', e);
+    }
+
+    // Update text input when dropdown changes and run code
+    if (workspace) {
+      workspace.addChangeListener(function(event) {
+        try {
+          if (event.type === Blockly.Events.CHANGE && event.element === 'field' && event.name === 'COLOR') {
+            const block = workspace.getBlockById(event.blockId);
+            if (block) {
+              block.setFieldValue(event.newValue, 'COLOR_NAME');
+            }
+          }
+          document.getElementById('svgCanvas').innerHTML = '';
+          const code = Blockly.JavaScript.workspaceToCode(workspace);
+          console.log('Generated code:', code);
+          eval(code);
+        } catch (e) {
+          console.error('Error in workspace change listener:', e);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
